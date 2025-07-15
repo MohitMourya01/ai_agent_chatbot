@@ -1,0 +1,36 @@
+services:
+  static_html:
+    build:
+      context: ./static_html
+      dockerfile: static.Dockerfile
+    
+    ports:
+      - 8001:8001
+      - 3001:3000
+    volumes:
+      - ./static_html:/app/static_html
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    working_dir: /app/backend
+    develop:
+      watch:
+        - action: rebuild
+          path: backend/requirements.txt
+        - action: rebuild
+          path: backend/Dockerfile
+        - action: restart
+          path: backend/src/
+    command: uvicorn src.main:app --host 0.0.0.0 --port 3000 --reload
+    environment:
+      - PORT=3000
+      - MY_PROJECT="AI CHATBOT"
+    env_file:
+      - .env
+    ports:
+      - 3002:3000
+      - 8002:8000
+    volumes:
+      - ./backend:/app/backend
